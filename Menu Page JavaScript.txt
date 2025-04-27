@@ -1,0 +1,130 @@
+// Menu Page JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    // Category Filtering
+    const categoryTabs = document.querySelectorAll('.category-tab');
+    const menuItems = document.querySelectorAll('.menu-item');
+    
+    categoryTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Update active tab
+            categoryTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            const category = this.dataset.category;
+            
+            // Filter items
+            menuItems.forEach(item => {
+                if (category === 'all' || item.dataset.category === category) {
+                    item.style.display = 'block';
+                    item.classList.add('animate__animated', 'animate__fadeIn');
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Smooth scroll to first category
+            if (category !== 'all') {
+                const categorySection = document.getElementById(category);
+                if (categorySection) {
+                    window.scrollTo({
+                        top: categorySection.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        });
+    });
+    
+    // Add to cart functionality
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', function() {
+            const item = this.closest('.menu-item');
+            const itemName = item.querySelector('h3').textContent;
+            const itemPrice = item.querySelector('.item-price').textContent;
+            
+            // Show notification
+            showNotification(`${itemName} added to cart!`);
+            
+            // Update cart count
+            updateCartCount();
+            
+            // Button animation
+            this.classList.add('animate__animated', 'animate__pulse');
+            setTimeout(() => {
+                this.classList.remove('animate__animated', 'animate__pulse');
+            }, 1000);
+        });
+    });
+    
+    // Update cart count from localStorage
+    function updateCartCount() {
+        let cartCount = localStorage.getItem('cartCount') || 0;
+        cartCount++;
+        localStorage.setItem('cartCount', cartCount);
+        document.getElementById('cart-count').textContent = cartCount;
+    }
+    
+    // Initialize cart count
+    const initialCount = localStorage.getItem('cartCount') || 0;
+    document.getElementById('cart-count').textContent = initialCount;
+    
+    // Show notification function
+    function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'menu-notification';
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 300);
+        }, 2000);
+    }
+    
+    // Add notification styles dynamically
+    const style = document.createElement('style');
+    style.textContent = `
+        .menu-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success-color);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+        
+        .menu-notification.show {
+            opacity: 1;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Mobile menu toggle (same as main.js)
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+    
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navLinks.classList.toggle('active');
+    });
+    
+    // Close mobile menu when clicking a link
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        link.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            navLinks.classList.remove('active');
+        });
+    });
+});
